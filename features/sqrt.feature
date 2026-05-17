@@ -3,7 +3,7 @@ Feature: Square Root Operation
   I want to calculate square roots
   So that I can get principal root results
 
-  @smoke @happy_path @critical @sqrt
+  @smoke @happy_path @critical
   Scenario: Square root of a perfect square
     Given the calculator API is running
     When I send a POST request to "/sqrt" with body {"a": 49}
@@ -11,7 +11,7 @@ Feature: Square Root Operation
     And the response "result" should equal 7
     And the response "error" should equal null
 
-  @regression @happy_path @sqrt
+  @regression @happy_path
   Scenario Outline: Square root of valid values
     Given the calculator API is running
     When I send a POST request to "/sqrt" with body {"a": <a>}
@@ -27,7 +27,7 @@ Feature: Square Root Operation
       | 2.25 | 1.5      |
       | 100  | 10       |
 
-  @negative @edge_case @critical @sqrt
+  @negative @edge_case @critical
   Scenario: Square root of negative number should return friendly error
     Given the calculator API is running
     When I send a POST request to "/sqrt" with body {"a": -9}

@@ -3,7 +3,7 @@ Feature: Division Operation
   I want to divide two numbers
   So that I can get the correct quotient
 
-  @smoke @happy_path @critical @division
+  @smoke @happy_path @critical
   Scenario: Divide two positive integers
     Given the calculator API is running
     When I send a POST request to "/divide" with body {"a": 20, "b": 5}
@@ -11,7 +11,7 @@ Feature: Division Operation
     And the response "result" should equal 4
     And the response "error" should equal null
 
-  @regression @happy_path @division
+  @regression @happy_path
   Scenario Outline: Divide various number combinations
     Given the calculator API is running
     When I send a POST request to "/divide" with body {"a": <a>, "b": <b>}
@@ -27,7 +27,7 @@ Feature: Division Operation
       | 7.5  | 2.5 | 3.0      |
       | 100  | 4   | 25       |
 
-  @negative @edge_case @critical @division
+  @negative @edge_case @critical
   Scenario: Divide by zero should return friendly error
     Given the calculator API is running
     When I send a POST request to "/divide" with body {"a": 5, "b": 0}

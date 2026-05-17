@@ -13,18 +13,14 @@ behave features/ --tags=@smoke    # smoke only
 
 ## Architecture
 ```text
-[Code Change: PR/Push]
+[Commit Push]
     │
     ▼
-[Selective Job]
-    └── ML Selector reads changed files + mapping
-        → runs selected tags only
-
-[Daily Schedule]
-    └── Smoke/Sanity job
-
-[Weekly or Sprint-end Schedule]
-    └── Full Regression job
+[GitHub Actions CI]
+    ├── Job 1: Full Regression Suite (all 35 tests) → test_run_log.jsonl
+    ├── Job 2: Smoke Only (@smoke tag) → fast feedback
+    └── Job 3: ML Selector reads log + changed files
+               → selects subset → runs selected tests only
 ```
 
 ## Framework structure
@@ -56,18 +52,3 @@ Each scenario appends one JSON line:
 - **Selection rate**: selected tests ÷ total tests.
 - **Execution time reduction**: full suite runtime vs selected subset runtime.
 - **Precision (optional)**: fraction of selected tests that actually fail.
-
-
-## Selective testing, traceability, and mapping
-- `scripts/simulate_ml_selection.py` is executed in CI before the selective run.
-- It reads changed files from `GIT_CHANGED_FILES`, historical metadata from `tests/test_run_log.jsonl`, and mapping rules from `config/test_selection_map.yaml`.
-- It outputs:
-  - `selected_tags.txt` (used by Behave to run only selected tests)
-  - `selection_reason.json` (audit log explaining why each tag was selected and which mapping rules matched)
-- Mapping is version-controlled in `config/test_selection_map.yaml` so teams can evolve selection logic with code review.
-
-## CI execution strategy (optimized for runtime)
-- **On every PR/push to main**: run only **selected impacted tests** (`selective-test`).
-- **Daily (cron)**: run **smoke** checks for environment confidence.
-- **Weekly/Sprint-end (cron)**: run **full regression** for broad coverage and baseline freshness.
-- **Manual override**: trigger smoke or full regression anytime via `workflow_dispatch` inputs.

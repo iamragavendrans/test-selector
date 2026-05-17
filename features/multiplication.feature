@@ -3,14 +3,14 @@ Feature: Multiplication Operation
   I want to multiply two numbers
   So that I can get the correct product
 
-  @smoke @happy_path @critical @multiplication
+  @smoke @happy_path @critical
   Scenario: Multiply two positive integers
     Given the calculator API is running
     When I send a POST request to "/multiply" with body {"a": 6, "b": 7}
     Then the response status should be 200
     And the response "result" should equal 42
 
-  @regression @happy_path @multiplication
+  @regression @happy_path
   Scenario Outline: Multiply various number combinations
     Given the calculator API is running
     When I send a POST request to "/multiply" with body {"a": <a>, "b": <b>}
@@ -25,7 +25,7 @@ Feature: Multiplication Operation
       | 1.5  | 2.0  | 3.0      |
       | 100  | 200  | 20000    |
 
-  @edge_case @regression @multiplication
+  @edge_case @regression
   Scenario: Multiply very large values
     Given the calculator API is running
     When I send a POST request to "/multiply" with body {"a": 1000000, "b": 1000000}
