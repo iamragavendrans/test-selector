@@ -1,54 +1,48 @@
-# SimpleCalc TIA — ML-Based Impacted Test Selection Demo
+# OrangeHRM + ReqRes — Playwright TypeScript Allure Framework
 
-This repository demonstrates a production-style test automation setup for a FastAPI calculator service using Behave (Cucumber-style BDD), CI/CD on GitHub Actions, and ML-ready scenario execution metadata for impacted test selection. It shows how to collect rich test signals, run smoke and regression suites, and simulate a model selecting only the tests most likely to fail after a code change.
+A production-focused Playwright + TypeScript automation framework with Allure reporting, split by test layers (unit/api/ui/e2e), and CI quality gates.
 
-## Quick start
+## Quality strategy and best practices implemented
+- Single framework for UI and API automation (Playwright).
+- Layered execution model: `@unit`, `@api`, `@ui`, `@e2e` projects.
+- Page Object Model for UI (`framework/pages/login.page.ts`).
+- API client abstraction for reuse and maintainability (`framework/api/reqres.client.ts`).
+- Shared fixture injection (`framework/fixtures/test-fixtures.ts`).
+- Environment centralization (`framework/config/env.ts`).
+- Failure diagnostics enabled by default (trace/video/screenshot).
+- Allure + Playwright HTML reporting.
+- CI matrix running each quality layer independently.
+
+## Structure
+- `framework/config/` → env configuration
+- `framework/pages/` → page objects
+- `framework/api/` → API clients
+- `framework/fixtures/` → typed fixtures
+- `tests/unit/` → unit tests
+- `tests/api/` → API scenario tests
+- `tests/ui/` → UI scenario tests
+- `tests/e2e/` → cross-layer tests
+- `features/` → scenario-based feature documentation
+
+## Run locally
 ```bash
-git clone <your-repo-url>
-cd calculator-tia
-pip install -r app/requirements.txt
-behave features/                  # run all tests
-behave features/ --tags=@smoke    # smoke only
+npm ci
+npx playwright install --with-deps chromium
+npm run test:unit
+npm run test:api
+npm run test:ui
+npm run test:e2e
+npm run test
+npm run allure:generate
+npm run allure:open
 ```
 
-## Architecture
-```text
-[Commit Push]
-    │
-    ▼
-[GitHub Actions CI]
-    ├── Job 1: Full Regression Suite (all 35 tests) → test_run_log.jsonl
-    ├── Job 2: Smoke Only (@smoke tag) → fast feedback
-    └── Job 3: ML Selector reads log + changed files
-               → selects subset → runs selected tests only
-```
+## Reporting
+- Allure raw: `allure-results/`
+- Allure HTML: `allure-report/`
+- Playwright HTML: `playwright-report/`
 
-## Framework structure
-- **Feature files** (`features/*.feature`): business-readable acceptance criteria.
-- **Step definitions** (`features/steps/*.py`): executable automation logic bound to steps.
-- **Locators/constants** (`features/locators/api_locators.py`): centralized endpoints, fields, and status codes.
-- **Hooks** (`features/environment.py`): lifecycle, app startup/shutdown, metadata logging.
-
-## Extending to a real ML model
-Replace `scripts/simulate_ml_selection.py` logic with:
-1. Loading a trained model artifact.
-2. Building features from changed files + historical test metadata.
-3. Predicting per-test risk score and selecting by threshold/budget.
-4. Writing selected tags/tests in the same output contract used now.
-
-## `test_run_log.jsonl` schema
-Each scenario appends one JSON line:
-- `scenario` (string)
-- `feature` (string)
-- `tags` (array[string])
-- `status` (`passed` or `failed`)
-- `duration_ms` (float)
-- `endpoint` (string)
-- `commit_sha` (string)
-- `changed_files` (string)
-
-## Evaluation metrics
-- **Failure recall**: percent of truly failing tests captured by selection.
-- **Selection rate**: selected tests ÷ total tests.
-- **Execution time reduction**: full suite runtime vs selected subset runtime.
-- **Precision (optional)**: fraction of selected tests that actually fail.
+## CI
+Workflow: `.github/workflows/playwright-allure.yml`
+- Matrix quality gates: `unit`, `api`, `ui`, `e2e`
+- Uploads per-layer Allure + Playwright reports.
