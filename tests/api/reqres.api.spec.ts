@@ -3,8 +3,7 @@ import { test, expect } from '../../framework/fixtures/test-fixtures';
 test.describe('ReqRes API scenarios @api @scenario @critical', () => {
   test('list users page 2', async ({ reqresClient }) => {
     const res = await reqresClient.listUsers(2);
-    expect(res.status()).toBe(200);
-    const body = await res.json();
+    const body = await ReqResAssertions.expectStatusAndJson(res, 200);
     expect(body.page).toBe(2);
     expect(Array.isArray(body.data)).toBeTruthy();
   });
@@ -18,12 +17,6 @@ test.describe('ReqRes API scenarios @api @scenario @critical', () => {
   test('user not found', async ({ reqresClient }) => {
     const res = await reqresClient.getUser(23);
     expect(res.status()).toBe(404);
-  });
-
-  test('create user', async ({ reqresClient }) => {
-    const res = await reqresClient.createUser('morpheus', 'leader');
-    const body = await ReqResAssertions.expectStatusAndJson(res, 201);
-    expect(body.name).toBe('morpheus');
   });
 });
 

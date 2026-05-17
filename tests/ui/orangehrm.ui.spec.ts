@@ -9,4 +9,13 @@ test.describe('OrangeHRM UI scenarios @ui @scenario @smoke', () => {
     await loginPage.login(ENV.orangehrmUsername, ENV.orangehrmPassword);
     await loginPage.assertDashboardVisible();
   });
+
+  test('login and navigate to PIM module', async ({ page }) => {
+    const loginPage = new LoginPage(page);
+    await loginPage.goto(ENV.orangehrmUrl);
+    await loginPage.login(ENV.orangehrmUsername, ENV.orangehrmPassword);
+    await loginPage.assertDashboardVisible();
+    await page.getByRole('link', { name: 'PIM' }).click();
+    await page.waitForURL(/\/pim\//);
+  });
 });

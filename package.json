@@ -9,11 +9,12 @@
     "test:ui": "playwright test --project=ui",
     "test:e2e": "playwright test --project=e2e",
     "test:smoke": "playwright test --grep @smoke",
-    "allure:generate": "allure generate ./allure-results --clean -o ./allure-report",
-    "allure:open": "allure open ./allure-report"
+    "allure:generate": "npx allure generate ./allure-results --clean -o ./allure-report",
+    "allure:open": "npx allure open ./allure-report"
   },
   "devDependencies": {
     "@playwright/test": "^1.54.2",
-    "allure-playwright": "^3.0.0-beta.8"
+    "allure-playwright": "^3.0.0-beta.8",
+    "allure-commandline": "^2.29.0"
   }
 }

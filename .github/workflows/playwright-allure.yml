@@ -29,6 +29,7 @@ jobs:
           ORANGEHRM_PASSWORD: ${{ secrets.ORANGEHRM_PASSWORD }}
           REQRES_BASE_URL: https://reqres.in/api
       - if: always()
+        continue-on-error: true
         run: npm run allure:generate
       - uses: actions/upload-artifact@v4
         if: always()
