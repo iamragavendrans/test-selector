@@ -1,0 +1,42 @@
+name: Playwright TypeScript + Allure
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  quality-gate:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        project: [unit, api, ui, e2e]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npx playwright test --project=${{ matrix.project }}
+        env:
+          ORANGEHRM_URL: ${{ vars.ORANGEHRM_URL }}
+          ORANGEHRM_USERNAME: ${{ secrets.ORANGEHRM_USERNAME }}
+          ORANGEHRM_PASSWORD: ${{ secrets.ORANGEHRM_PASSWORD }}
+          REQRES_BASE_URL: https://reqres.in/api
+      - if: always()
+        run: npm run allure:generate
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: allure-report-${{ matrix.project }}
+          path: allure-report
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-report-${{ matrix.project }}
+          path: playwright-report
