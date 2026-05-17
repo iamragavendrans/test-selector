@@ -1,0 +1,109 @@
+name: CI
+
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+  schedule:
+    - cron: "0 6 * * *"   # Daily smoke/sanity run at 06:00 UTC
+    - cron: "0 7 * * 1"   # Weekly full regression on Monday at 07:00 UTC
+  workflow_dispatch:
+    inputs:
+      run_full_regression:
+        description: "Run full regression suite"
+        required: false
+        default: "false"
+      run_smoke:
+        description: "Run smoke suite"
+        required: false
+        default: "false"
+
+jobs:
+  selective-test:
+    name: Selected Tests on Change
+    if: github.event_name == 'pull_request' || github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install -r app/requirements.txt
+      - name: Set git metadata
+        run: |
+          echo "GIT_COMMIT_SHA=${{ github.sha }}" >> $GITHUB_ENV
+          echo "GIT_CHANGED_FILES=$(git diff --name-only HEAD~1 HEAD || echo '')" >> $GITHUB_ENV
+          echo "LOG_FILE=tests/selective_run_log.jsonl" >> $GITHUB_ENV
+      - run: python scripts/simulate_ml_selection.py
+      - run: behave features/ --tags="$(cat selected_tags.txt)" --no-capture
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: selected-tags
+          path: selected_tags.txt
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: selective-run-log
+          path: tests/selective_run_log.jsonl
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: selection-reason
+          path: selection_reason.json
+
+  smoke-only:
+    name: Smoke Tests (Scheduled/Manual)
+    if: |
+      github.event_name == 'schedule' && github.event.schedule == '0 6 * * *' ||
+      github.event_name == 'workflow_dispatch' && inputs.run_smoke == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install -r app/requirements.txt
+      - name: Set git metadata
+        run: |
+          echo "GIT_COMMIT_SHA=${{ github.sha }}" >> $GITHUB_ENV
+          echo "GIT_CHANGED_FILES=$(git diff --name-only HEAD~1 HEAD || echo '')" >> $GITHUB_ENV
+          echo "LOG_FILE=tests/smoke_run_log.jsonl" >> $GITHUB_ENV
+      - run: behave features/ --tags=@smoke --no-capture
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: smoke-run-log
+          path: tests/smoke_run_log.jsonl
+
+  full-regression:
+    name: Full Regression (Scheduled/Manual)
+    if: |
+      github.event_name == 'schedule' && github.event.schedule == '0 7 * * 1' ||
+      github.event_name == 'workflow_dispatch' && inputs.run_full_regression == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install -r app/requirements.txt
+      - name: Set git metadata
+        run: |
+          echo "GIT_COMMIT_SHA=${{ github.sha }}" >> $GITHUB_ENV
+          echo "GIT_CHANGED_FILES=$(git diff --name-only HEAD~1 HEAD || echo '')" >> $GITHUB_ENV
+          echo "LOG_FILE=tests/test_run_log.jsonl" >> $GITHUB_ENV
+      - run: behave features/ --no-capture
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: full-test-run-log
+          path: tests/test_run_log.jsonl
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: behave-report
+          path: reports/behave_report.txt
