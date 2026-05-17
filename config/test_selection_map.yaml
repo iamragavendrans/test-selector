@@ -1,0 +1,99 @@
+default:
+  include_tags:
+    - "@smoke"
+    - "@critical"
+  fallback_tags:
+    - "@happy_path"
+  rationale: "Always run critical/smoke. If no direct file mapping hit, run happy path coverage."
+
+mappings:
+  - id: "calc_add"
+    match_any:
+      - "app/main.py"
+      - "features/addition.feature"
+      - "features/steps/addition_steps.py"
+    include_tags:
+      - "@smoke"
+      - "@critical"
+      - "@addition"
+    rationale: "Addition related code changed."
+
+  - id: "calc_subtract"
+    match_any:
+      - "app/main.py"
+      - "features/subtraction.feature"
+      - "features/steps/subtraction_steps.py"
+    include_tags:
+      - "@smoke"
+      - "@critical"
+      - "@subtraction"
+    rationale: "Subtraction related code changed."
+
+  - id: "calc_multiply"
+    match_any:
+      - "app/main.py"
+      - "features/multiplication.feature"
+      - "features/steps/multiplication_steps.py"
+    include_tags:
+      - "@smoke"
+      - "@critical"
+      - "@multiplication"
+    rationale: "Multiplication related code changed."
+
+  - id: "calc_divide"
+    match_any:
+      - "app/main.py"
+      - "features/division.feature"
+      - "features/steps/division_steps.py"
+    include_tags:
+      - "@smoke"
+      - "@critical"
+      - "@division"
+      - "@negative"
+    rationale: "Division logic changed; include edge/negative coverage."
+
+  - id: "calc_power"
+    match_any:
+      - "app/main.py"
+      - "features/power.feature"
+      - "features/steps/power_steps.py"
+    include_tags:
+      - "@smoke"
+      - "@critical"
+      - "@power"
+    rationale: "Power operation changed."
+
+  - id: "calc_sqrt"
+    match_any:
+      - "app/main.py"
+      - "features/sqrt.feature"
+      - "features/steps/sqrt_steps.py"
+    include_tags:
+      - "@smoke"
+      - "@critical"
+      - "@sqrt"
+      - "@negative"
+    rationale: "Sqrt behavior changed; include negative validation."
+
+  - id: "health"
+    match_any:
+      - "features/health.feature"
+      - "features/steps/health_steps.py"
+      - "features/environment.py"
+    include_tags:
+      - "@smoke"
+      - "@critical"
+      - "@health"
+    rationale: "Health checks or test harness lifecycle changed."
+
+  - id: "test_framework"
+    match_any:
+      - "features/steps/common_steps.py"
+      - "features/locators/api_locators.py"
+      - "behave.ini"
+      - ".github/workflows/ci.yml"
+    include_tags:
+      - "@smoke"
+      - "@critical"
+      - "@regression"
+    rationale: "Shared framework changed; broaden to regression safety net."
