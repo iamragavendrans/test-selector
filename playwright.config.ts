@@ -21,9 +21,9 @@ export default defineConfig({
     navigationTimeout: 20_000
   },
   projects: [
-    { name: 'unit', grep: /@unit/ },
-    { name: 'api', grep: /@api/, use: { ...devices['Desktop Chrome'] } },
-    { name: 'ui', grep: /@ui/, use: { ...devices['Desktop Chrome'] } },
-    { name: 'e2e', grep: /@e2e/, use: { ...devices['Desktop Chrome'] } }
+    { name: 'unit', testMatch: /tests\/unit\/.*\.spec\.ts$/ },
+    { name: 'api', testMatch: /tests\/api\/.*\.spec\.ts$/, use: { ...devices['Desktop Chrome'] } },
+    { name: 'ui', testMatch: /tests\/ui\/.*\.spec\.ts$/, use: { ...devices['Desktop Chrome'] } },
+    { name: 'e2e', testMatch: /tests\/e2e\/.*\.spec\.ts$/, use: { ...devices['Desktop Chrome'] } }
   ]
 });

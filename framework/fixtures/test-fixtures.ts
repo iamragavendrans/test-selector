@@ -8,7 +8,7 @@ type AppFixtures = {
 
 export const test = base.extend<AppFixtures>({
   reqresClient: async ({ request }, use) => {
-    await use(new ReqResClient(request, ENV.reqresBaseUrl));
+    await use(new ReqResClient(request, ENV.reqresBaseUrl, ENV.reqresApiKey));
   }
 });
 

@@ -20,7 +20,7 @@ jobs:
         with:
           node-version: '20'
           cache: 'npm'
-      - run: npm ci
+      - run: npm install
       - run: npx playwright install --with-deps chromium
       - run: npx playwright test --project=${{ matrix.project }}
         env:
@@ -28,6 +28,7 @@ jobs:
           ORANGEHRM_USERNAME: ${{ secrets.ORANGEHRM_USERNAME }}
           ORANGEHRM_PASSWORD: ${{ secrets.ORANGEHRM_PASSWORD }}
           REQRES_BASE_URL: https://reqres.in/api
+          REQRES_API_KEY: ${{ secrets.REQRES_API_KEY }}
       - if: always()
         continue-on-error: true
         run: npm run allure:generate
