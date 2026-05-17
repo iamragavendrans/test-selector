@@ -4,3 +4,7 @@ allure-results/
 allure-report/
 playwright-report/
 test-results/
+
+# Environment secrets
+.env
+.env.local

@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
+    "pretest": "npx rimraf allure-results",
     "test": "playwright test",
     "test:unit": "playwright test --project=unit",
     "test:api": "playwright test --project=api",
@@ -10,7 +11,8 @@
     "test:e2e": "playwright test --project=e2e",
     "test:smoke": "playwright test --grep @smoke",
     "allure:generate": "npx allure generate ./allure-results --clean -o ./allure-report",
-    "allure:open": "npx allure open ./allure-report"
+    "allure:open": "npx allure open ./allure-report",
+    "allure:serve": "npx allure generate ./allure-results --clean -o ./allure-report && npx allure open ./allure-report"
   },
   "devDependencies": {
     "@playwright/test": "^1.54.2",

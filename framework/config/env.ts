@@ -5,5 +5,5 @@ export const ENV = {
   orangehrmUsername: process.env.ORANGEHRM_USERNAME || 'Admin',
   orangehrmPassword: process.env.ORANGEHRM_PASSWORD || 'admin123',
   reqresBaseUrl: process.env.REQRES_BASE_URL || 'https://reqres.in/api',
-  reqresApiKey: process.env.REQRES_API_KEY || ''
+  reqresApiKey: process.env.REQRES_API_KEY || 'free_user_3DqkKvy7cKLhY8uy4wAX3LI8qQw'
 };
