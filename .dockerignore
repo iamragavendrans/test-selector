@@ -1,0 +1,16 @@
+.git
+.github
+.venv
+venv
+__pycache__
+*.pyc
+*.pyo
+*.egg-info
+dist
+build
+node_modules
+tests
+*.md
+.gitignore
+action.yml
+scripts/

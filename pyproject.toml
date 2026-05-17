@@ -1,0 +1,22 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "test-selector"
+version = "0.1.0"
+description = "ML-based test selector: picks which tests to run based on changed files and a YAML mapping config."
+requires-python = ">=3.9"
+dependencies = ["pyyaml>=6.0", "networkx>=3.0"]
+
+[project.scripts]
+test-selector = "test_selector.cli:main"
+
+[project.optional-dependencies]
+dev = ["pytest>=7.0"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests/test_selector"]
+
+[project.urls]
+Repository = "https://github.com/iamragavendrans/test-selector"

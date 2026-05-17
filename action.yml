@@ -1,0 +1,66 @@
+name: ML Test Selector
+description: >
+  Selects which tests to run based on changed files and a YAML mapping config.
+  Outputs a tag expression consumable by Behave, Playwright, pytest, or any runner.
+
+  GitHub Actions: use this composite action (works on Linux/macOS/Windows runners).
+  GitLab CI / CircleCI / Azure DevOps / Jenkins: use the OCI image directly —
+    ghcr.io/iamragavendrans/test-selector:latest
+  Example (GitLab CI):
+    select-tests:
+      image: ghcr.io/iamragavendrans/test-selector:latest
+      script: test-selector --from-git --config test_selection_map.yaml --format lines
+  Example (CircleCI):
+    executors:
+      selector: { docker: [{ image: ghcr.io/iamragavendrans/test-selector:latest }] }
+  Example (Jenkins):
+    agent { docker { image 'ghcr.io/iamragavendrans/test-selector:latest' } }
+branding:
+  icon: filter
+  color: blue
+
+inputs:
+  changed-files:
+    description: Space-separated list of changed file paths.
+    required: false
+    default: ""
+  config:
+    description: Path to test_selection_map.yaml relative to the consuming repo root.
+    required: false
+    default: test_selection_map.yaml
+  format:
+    description: >
+      Output format: expr (Behave, default), json, lines,
+      playwright (regex for --grep), pytest (marks without @).
+    required: false
+    default: expr
+  output-file:
+    description: Optional file path to write the selected tags into.
+    required: false
+    default: ""
+
+outputs:
+  selected-tags:
+    description: The selected test tags in the requested format.
+    value: ${{ steps.run.outputs.tags }}
+
+runs:
+  using: composite
+  steps:
+    - name: Install test-selector
+      shell: bash
+      run: pip install "${{ github.action_path }}" --quiet
+
+    - name: Select tests
+      id: run
+      shell: bash
+      env:
+        GIT_CHANGED_FILES: ${{ inputs.changed-files }}
+      run: |
+        ARGS="--config ${{ inputs.config }} --format ${{ inputs.format }}"
+        if [ -n "${{ inputs.output-file }}" ]; then
+          ARGS="$ARGS --output ${{ inputs.output-file }}"
+        fi
+        TAGS=$(test-selector $ARGS)
+        echo "tags=$TAGS" >> "$GITHUB_OUTPUT"
+        echo "Selected tags: $TAGS"

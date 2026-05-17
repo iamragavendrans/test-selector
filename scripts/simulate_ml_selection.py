@@ -1,55 +1,44 @@
 #!/usr/bin/env python3
 """
-Stand-in for the ML model. In production, this script would:
-  1. Load a trained classifier (e.g., gradient boosted tree)
-  2. Feature-encode: changed files + test metadata
-  3. Predict P(fail) for each test
-  4. Select top-K tests by predicted risk / time budget
+Stand-in for the ML model. Delegates all selection logic to the
+test_selector package so there is a single source of truth.
 
-For now, implements a rule-based heuristic that mimics ML behavior
-and outputs the same interface the real ML model would use.
+In production v2, replace the heuristic engine in test_selector/selector.py
+with a trained classifier (gradient boosted tree, etc.) — this script stays
+the same.
 """
 
-import json
 import os
+import sys
 from pathlib import Path
 
-LOG_PATH = Path("tests/test_run_log.jsonl")
+# Allow running from repo root before the package is installed
+sys.path.insert(0, str(Path(__file__).parent.parent))
+
+from test_selector.selector import explain_selection, format_tags, load_config, select_tags
+
+CONFIG_PATH = Path("config/test_selection_map.yaml")
 SELECTED_TAGS_FILE = Path("selected_tags.txt")
 
 
-def main():
-    changed_files = os.getenv("GIT_CHANGED_FILES", "").split()
-    entries = []
-    if LOG_PATH.exists():
-        with LOG_PATH.open("r", encoding="utf-8") as handle:
-            entries = [json.loads(line) for line in handle if line.strip()]
+def main() -> None:
+    changed_files = [f for f in os.getenv("GIT_CHANGED_FILES", "").split() if f]
+    config = load_config(CONFIG_PATH)
+    explanation = explain_selection(changed_files, config)
+    tags = select_tags(changed_files, config)
+    result = format_tags(tags, "expr")
 
-    selected_tags = {"@smoke", "@critical"}
-    changed_blob = " ".join(changed_files).lower()
-    if "add" in changed_blob:
-        selected_tags.add("@addition")
-    if "subtract" in changed_blob:
-        selected_tags.add("@subtraction")
-    if "add" not in changed_blob and "subtract" not in changed_blob:
-        selected_tags.add("@happy_path")
+    SELECTED_TAGS_FILE.write_text(result, encoding="utf-8")
 
-    selected_expr = " or ".join(sorted(selected_tags))
-    SELECTED_TAGS_FILE.write_text(selected_expr, encoding="utf-8")
-
-    total_tests = len(entries)
-    selected_tests = sum(1 for e in entries if set(e.get("tags", [])) & set(tag.strip("@") for tag in selected_tags))
-    if total_tests == 0:
-        selected_tests = 0
-    ratio = int((selected_tests / total_tests) * 100) if total_tests else 0
-
-    print("── ML Test Selector ──────────────────────")
-    print(f"Changed files : {' '.join(changed_files) if changed_files else '(none)'}")
-    print(f"Total tests   : {total_tests}")
-    print(f"Selected tests: {selected_tests} ({ratio}%)")
-    print("Strategy      : heuristic (replace with model in v2)")
-    print(f"Selected tags : {selected_expr}")
-    print("──────────────────────────────────────────")
+    print("-- ML Test Selector ------------------------------")
+    print(f"  Changed files : {' '.join(changed_files) or '(none)'}")
+    if explanation["matched_mappings"]:
+        for m in explanation["matched_mappings"]:
+            print(f"  Rule matched  : [{m['id']}] - {m['rationale']}")
+    else:
+        print("  Strategy      : fallback (no mapping matched changed files)")
+    print(f"  Selected tags : {result}")
+    print("--------------------------------------------------")
 
 
 if __name__ == "__main__":
