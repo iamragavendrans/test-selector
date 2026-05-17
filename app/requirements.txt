@@ -1,0 +1,11 @@
+fastapi
+uvicorn[standard]
+pytest
+pytest-bdd
+requests
+httpx
+behave
+allure-behave
+pytest-allure-adaptor
+python-dotenv
+pyyaml
